@@ -56,12 +56,22 @@ def normalize_gitlab_url(value: str) -> str:
     return urlunsplit(("https", parsed.hostname, parsed.path.rstrip("/"), "", ""))
 
 
-def repository_path(value: str) -> str:
-    """Validate a namespaced GitLab project path."""
+def project_name(value: str) -> str:
+    """Validate a GitLab project name supplied on the command line."""
+    normalized = value.strip()
+    if not normalized or "/" in normalized or normalized in (".", ".."):
+        raise argparse.ArgumentTypeError(
+            "project must be a name only, such as my-project"
+        )
+    return normalized
+
+
+def group_path(value: str) -> str:
+    """Validate and normalize a GitLab group path from the environment."""
     normalized = value.strip().strip("/")
     if not normalized or any(part in (".", "..") for part in normalized.split("/")):
-        raise argparse.ArgumentTypeError(
-            "repository must be a GitLab project path such as group/project"
+        raise GitLabError(
+            "GITLAB_GROUP must be a GitLab group path such as my-group"
         )
     return normalized
 
@@ -218,25 +228,25 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "list", help="List open merge requests as Markdown."
     )
     list_parser.add_argument(
-        "repository",
+        "project",
         nargs="?",
-        type=repository_path,
-        help="GitLab project path, e.g. group/project",
+        type=project_name,
+        help="GitLab project name only, e.g. my-project",
     )
     args = parser.parse_args(argv)
-    if args.operation == "list" and args.repository is None:
-        list_parser.error(
-            "repository is required; for example: group/project"
-        )
+    if args.operation == "list" and args.project is None:
+        list_parser.error("project is required")
     return args
 
 
-def list_merge_requests_markdown(repository: str) -> str:
-    """Fetch and render a repository's open merge requests."""
+def list_merge_requests_markdown(project: str) -> str:
+    """Fetch and render a project's open merge requests."""
     gitlab_url = normalize_gitlab_url(
         os.environ.get("GITLAB_URL", "https://gitlab.com")
     )
     token = environment_value("GITLAB_TOKEN")
+    group = group_path(environment_value("GITLAB_GROUP"))
+    repository = f"{group}/{project}"
     merge_requests = fetch_open_merge_requests(gitlab_url, token, repository)
     return list_markdown(repository, merge_requests)
 
@@ -245,7 +255,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
         if args.operation == "list":
-            sys.stdout.write(list_merge_requests_markdown(args.repository))
+            sys.stdout.write(list_merge_requests_markdown(args.project))
     except GitLabError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
