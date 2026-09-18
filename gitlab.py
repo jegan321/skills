@@ -190,7 +190,7 @@ def merge_request_markdown(merge_request: dict[str, Any]) -> str:
     url = merge_request.get("web_url")
     lines = [f"## {heading_text(title)}"]
     if isinstance(url, str) and url.strip():
-        lines.append(f"[View merge request](<{url.strip()}>)")
+        lines.append(f"[View](<{url.strip()}>)")
 
     fields = (
         ("State", humanize_state(merge_request.get("state"))),
@@ -198,7 +198,7 @@ def merge_request_markdown(merge_request: dict[str, Any]) -> str:
         ("Last updated", local_timestamp(merge_request.get("updated_at"))),
     )
     lines.extend(f"**{label}:** {value}" for label, value in fields if value is not None)
-    return "\n\n".join(lines)
+    return "  \n".join(lines)
 
 
 def list_markdown(repository: str, merge_requests: list[dict[str, Any]]) -> str:
