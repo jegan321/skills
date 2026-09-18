@@ -181,6 +181,36 @@ def local_timestamp(value: Any) -> str | None:
     return f"{formatted} {timezone}".rstrip()
 
 
+def pipeline_markdown(pipeline: Any) -> str:
+    """Render the status and link for the merge request's head pipeline."""
+    if not isinstance(pipeline, dict):
+        return "Not run"
+
+    status = pipeline.get("status")
+    if not isinstance(status, str) or not status.strip():
+        status_text = "Unknown"
+    else:
+        normalized_status = status.strip().lower()
+        status_text = {
+            "created": "Building",
+            "waiting_for_resource": "Waiting for resource",
+            "preparing": "Preparing",
+            "pending": "Pending",
+            "running": "Running",
+            "success": "Passed",
+            "failed": "Failed",
+            "canceled": "Canceled",
+            "skipped": "Skipped",
+            "manual": "Manual action required",
+            "scheduled": "Scheduled",
+        }.get(normalized_status, humanize_state(normalized_status) or "Unknown")
+
+    url = pipeline.get("web_url")
+    if isinstance(url, str) and url.strip():
+        return f"[{status_text}](<{url.strip()}>)"
+    return status_text
+
+
 def merge_request_markdown(merge_request: dict[str, Any]) -> str:
     """Render one merge request as Markdown."""
     title = merge_request.get("title")
@@ -194,6 +224,7 @@ def merge_request_markdown(merge_request: dict[str, Any]) -> str:
 
     fields = (
         ("State", humanize_state(merge_request.get("state"))),
+        ("Pipeline", pipeline_markdown(merge_request.get("head_pipeline"))),
         ("Author", author_name(merge_request.get("author"))),
         ("Last updated", local_timestamp(merge_request.get("updated_at"))),
     )
