@@ -231,12 +231,15 @@ def allows_implicit_invocation(config: Path) -> bool:
             continue
         if line and not line[0].isspace() and not line.startswith("#"):
             in_policy = False
-        if in_policy and re.fullmatch(
-            r"\s+allow_implicit_invocation:\s*true\s*(?:#.*)?", line
-        ):
-            return True
+        if in_policy:
+            setting = re.fullmatch(
+                r"\s+allow_implicit_invocation:\s*(true|false)\s*(?:#.*)?",
+                line,
+            )
+            if setting:
+                return setting.group(1) == "true"
 
-    return False
+    return True
 
 
 def render_skill(
