@@ -10,13 +10,23 @@ Run these commands from the repository root.
 
 ### Link skills
 
-Symlinks `global.md` to `~/.codex/AGENTS.md` and each skill in `skills/` into
-`~/.agents/skills`, making them available to Codex across local projects.
-Existing links to the same sources are left unchanged; conflicting files,
-directories, or links are reported without being overwritten.
+Symlinks each skill in `skills/` into `~/.agents/skills`, making them available
+to Codex across local projects. Existing links to the same sources are left
+unchanged; conflicting files, directories, or links are reported without being
+overwritten.
 
 ```sh
 ./link-skills.sh
+```
+
+### Link global instructions
+
+Symlinks `global.md` to `~/.codex/AGENTS.md`. An existing link to the same
+source is left unchanged; a conflicting file, directory, or link is reported
+without being overwritten.
+
+```sh
+./link-global.sh
 ```
 
 ### Unlink skill

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-# Make this repository's global agent instructions and skills available to
-# Codex across all local projects by symlinking them into the user's personal
-# configuration directories.
+# Make this repository's skills available to Codex across all local projects
+# by symlinking them into the user's personal skills directory.
 
 set -euo pipefail
 
@@ -10,7 +9,6 @@ set -euo pipefail
 # directory, allowing the command to be run from anywhere.
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 repo_dir=$script_dir
-source_file="$repo_dir/global.md"
 source_dir="$repo_dir/skills"
 
 usage() {
@@ -22,48 +20,19 @@ if (($# > 1)); then
   exit 2
 fi
 
-# Install global instructions in Codex's user-wide configuration directory.
-# The override keeps tests and one-off installations isolated from the real
-# home directory.
-codex_target_dir=${CODEX_TARGET_DIR:-"$HOME/.codex"}
-agents_link_path="$codex_target_dir/AGENTS.md"
-
 # Install personal skills in Codex's user-wide directory. The override is
 # useful for testing without modifying the real destination.
 skills_target_dir=${SKILLS_TARGET_DIR:-"$HOME/.agents/skills"}
 
 # Fail with useful errors instead of creating dangling symlinks if the
 # repository is incomplete or a source file was moved.
-if [[ ! -f "$source_file" ]]; then
-  printf 'error: global instructions not found: %s\n' "$source_file" >&2
-  exit 1
-fi
-
 if [[ ! -d "$source_dir" ]]; then
   printf 'error: skills directory not found: %s\n' "$source_dir" >&2
   exit 1
 fi
 
-# Support fresh Codex installations where either destination does not exist.
-mkdir -p -- "$codex_target_dir" "$skills_target_dir"
-
-agents_conflict=0
-
-# Link global instructions on every invocation, before processing skills.
-# Preserve every other existing file, directory, or symlink.
-if [[ -e "$agents_link_path" || -L "$agents_link_path" ]]; then
-  if [[ "$agents_link_path" -ef "$source_file" ]]; then
-    printf 'unchanged  %s -> %s\n' "$agents_link_path" "$source_file"
-  else
-    printf 'conflict   AGENTS.md already exists at %s\n' "$agents_link_path" >&2
-    agents_conflict=1
-  fi
-else
-  # Use an absolute source path so the link remains valid regardless of the
-  # current working directory or how Codex discovers it.
-  ln -s -- "$source_file" "$agents_link_path"
-  printf 'linked     %s -> %s\n' "$agents_link_path" "$source_file"
-fi
+# Support fresh Codex installations where the destination does not exist.
+mkdir -p -- "$skills_target_dir"
 
 # Track results so the final summary shows whether every selected skill was
 # linked.
@@ -121,6 +90,6 @@ done
 printf '\nLinked: %d; unchanged: %d; conflicts: %d\n' \
   "$linked" "$unchanged" "$conflicts"
 
-if ((agents_conflict > 0 || conflicts > 0)); then
+if ((conflicts > 0)); then
   exit 1
 fi
