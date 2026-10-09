@@ -1,11 +1,11 @@
 ---
-name: merge-request
-description: 'Create a description for a merge request'
+name: code-change-summary
+description: 'Write a description for a code change, merge request or diff'
 metadata:
-  original-author: "Matt Pocock"
+  inspired-by: "Matt Pocock"
 ---
 
-Use this template for writing the PR body:
+Use this template for writing content that describes a code change:
 
 ```markdown
 ## Summary
@@ -161,6 +161,6 @@ Execution-based evidence is A-tier. Test results, console output. Show the exact
 
 ### Merge Danger
 
-Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A PR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.
+Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A MR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.
 
-The blast radius is the potential impact or scope of the changes introduced by this PR. Consider all possibilities. Examples are layout shift, breakages for consumers, mobile responsiveness, etc.
+The blast radius is the potential impact or scope of the changes introduced by this MR. Consider all possibilities. Examples are layout shift, breakages for consumers, mobile responsiveness, etc.
