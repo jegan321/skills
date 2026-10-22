@@ -2,8 +2,6 @@
 
 Repository to keep track of my personal AI agent skills.
 
-Only skills in the `skills` directory are ready to be used by coding agents. The `wip` directory skills should not be discoverable by agents. Once they are completed they will be moved to `skills`.
-
 ## Scripts
 
 Run these commands from the repository root.
