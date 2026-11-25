@@ -1,0 +1,4 @@
+- Use the repository's `./add-skill.sh` script to create new skills.
+- When asked to add a skill with a name and description, keep the script-generated boilerplate unless the user also requests skill content or other changes.
+- Don't execute `./link-skills.sh` unless asked to.
+- Use `./unlink-skill.sh` when removing skills.
